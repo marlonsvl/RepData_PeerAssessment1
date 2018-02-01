@@ -42,6 +42,9 @@ averages[which.max(averages$steps),]
 
 ## Imputing missing values
 
+
+### The strategy was fill the missing values by the average for each 5-minute interval
+
 ```{r}
 missing <- is.na(activity$steps)
 table(missing)
@@ -61,6 +64,8 @@ fillActivity$steps <- mapply(fillMissing, fillActivity$steps, fillActivity$inter
 
 totalStepsFilled <- tapply(fillActivity$steps, fillActivity$date, FUN=sum, na.rm=TRUE)
 qplot(totalStepsFilled, geom = "histogram", xlab = "Total number of steps taken per day")
+
+## Show the mean and median
 mean(totalStepsFilled, na.rm = TRUE)
 median(totalStepsFilled, na.rm = TRUE)
 ```
