@@ -8,18 +8,79 @@ output:
 
 ## Loading and preprocessing the data
 
-
+```{r}
+unzip("activity.zip")
+activity <- read.csv("activity.csv")
+str(activity)
+summary(activity)
+```
 
 ## What is mean total number of steps taken per day?
-
-
+```{r}
+library(ggplot2)
+totalSteps <- tapply(activity$steps, activity$date, FUN=sum, na.rm=TRUE)
+qplot(totalSteps, geom = "histogram", xlab = "Total number of steps taken per day")
+mean(totalSteps, na.rm = TRUE)
+median(totalSteps, na.rm = TRUE)
+```
 
 ## What is the average daily activity pattern?
 
+```{r}
+
+averages <- aggregate(x=list(steps=activity$steps), by=list(interval=activity$interval),
+                      FUN=mean, na.rm=TRUE)
+str(averages)
+plot(averages$interval, averages$steps, type = "l", xlab = "5-minute interval",
+     ylab = "Average number of steps taken")
+
+averages <- data.frame(averages)
+averages[which.max(averages$steps),]
+
+```
 
 
 ## Imputing missing values
 
+```{r}
+missing <- is.na(activity$steps)
+table(missing)
 
+fillMissing <- function(steps, interval){
+    filled <- NA
+    if(is.na(steps)){
+        filled <- averages[averages$interval == interval, "steps"]
+    }else{
+        filled <- steps
+    }
+    return(filled)
+}
+
+fillActivity <- activity
+fillActivity$steps <- mapply(fillMissing, fillActivity$steps, fillActivity$interval)
+
+totalStepsFilled <- tapply(fillActivity$steps, fillActivity$date, FUN=sum, na.rm=TRUE)
+qplot(totalStepsFilled, geom = "histogram", xlab = "Total number of steps taken per day")
+mean(totalStepsFilled, na.rm = TRUE)
+median(totalStepsFilled, na.rm = TRUE)
+````
+
+Mean and median are higher after fill the missing values with the mean of each interval, because there are some days with steps values NA for any interval.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+fillActivity$date <- as.Date(fillActivity$date)
+# create a vector of weekdays
+weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+
+fillActivity$wDay <- factor((weekdays(fillActivity$date) %in% weekdays1), 
+         levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+
+str(fillActivity)
+
+```
+
+
+
+
