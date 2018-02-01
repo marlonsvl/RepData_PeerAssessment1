@@ -63,7 +63,7 @@ totalStepsFilled <- tapply(fillActivity$steps, fillActivity$date, FUN=sum, na.rm
 qplot(totalStepsFilled, geom = "histogram", xlab = "Total number of steps taken per day")
 mean(totalStepsFilled, na.rm = TRUE)
 median(totalStepsFilled, na.rm = TRUE)
-````
+```
 
 Mean and median are higher after fill the missing values with the mean of each interval, because there are some days with steps values NA for any interval.
 
@@ -78,6 +78,14 @@ fillActivity$wDay <- factor((weekdays(fillActivity$date) %in% weekdays1),
          levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
 
 str(fillActivity)
+
+steps_by_interval <- aggregate(steps ~ interval + wDay, fillActivity, mean)
+
+library(lattice)
+xyplot(steps ~ interval | wDay, data = steps_by_interval, layout = c(1,2), type = "l",
+       main="Average steps per day by interval")
+
+
 
 ```
 
